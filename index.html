@@ -271,12 +271,20 @@
     body { background: none; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     html { height: auto !important; }
     body { height: auto !important; overflow: visible !important; }
-    .page { width: 100%; min-height: auto !important; height: auto !important; padding: 0; box-shadow: none; display: block !important; }
-    .work-content-box { flex: none !important; min-height: 0 !important; height: auto !important; }
+    .page { width: 100%; min-height: auto !important; height: auto !important; padding: 12mm 14mm; box-shadow: none; display: flex !important; flex-direction: column !important; }
+    .work-content-box { flex: none !important; min-height: 80px !important; height: auto !important; }
     #page-sign { display: none !important; }
     .no-print { display: none !important; }
     .action-bar { display: none !important; }
     #page-form { display: block !important; height: auto !important; }
+    .row { display: flex !important; flex-direction: row !important; }
+    .cell { display: flex !important; align-items: stretch !important; min-height: 32px !important; height: auto !important; border-right: 0.5px solid #b0b8cc !important; border-bottom: none !important; }
+    .cell-label { width: 80px !important; min-width: 80px !important; display: flex !important; align-items: center !important; align-self: stretch !important; font-size: 13.5px !important; }
+    .cell-value { flex: 1 !important; padding: 5px 8px !important; font-size: 13.5px !important; display: flex !important; align-items: center !important; }
+    .cell-value input { font-size: 13.5px !important; border: none !important; background: transparent !important; width: 100% !important; }
+    .sign-row { display: flex !important; flex-direction: row !important; }
+    .sign-cell { flex: 1 !important; border-right: 0.5px solid #b0b8cc !important; border-bottom: none !important; }
+    .checkbox-grid { display: grid !important; grid-template-columns: repeat(6,1fr) !important; }
     * { page-break-inside: auto; }
     .footer { page-break-after: avoid; }
   }
@@ -360,7 +368,7 @@
       TEL：03-218-0011<br>
       FAX：03-218-0171
     </div>    <div style="flex-shrink:0; font-size:12px; color:#1a3a6b; font-weight:500; white-space:nowrap; display:flex; align-items:center; gap:4px;">
-      單號：<input id="doc-no" type="text" style="border:none; border-bottom:1px solid #1a3a6b; outline:none; font-size:12px; font-family:inherit; color:#1a3a6b; font-weight:500; width:90px; background:transparent; letter-spacing:0.5px; padding:0;">
+      單號：<input id="doc-no" type="text" style="border:none; border-bottom:1px solid #1a3a6b; outline:none; font-size:12px; font-family:inherit; color:#1a3a6b; font-weight:500; width:140px; background:transparent; letter-spacing:0.5px; padding:0;">
     </div>
   </div>
 
