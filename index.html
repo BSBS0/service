@@ -267,7 +267,7 @@
 
   /* 列印樣式 */
   @media print {
-    @page { margin: 10mm; size: A4; }
+    @page { margin: 0mm; size: A4; }
     body { background: none; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     html { height: auto !important; }
     body { height: auto !important; overflow: visible !important; }
@@ -690,9 +690,6 @@
   });
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
   // ── 鎖定 / 解鎖表單 ──
   let formLocked = false;
@@ -738,159 +735,8 @@
   }
 
   // ── 下載 PDF ──
-  async function downloadPDF() {
-    const btn = document.getElementById('pdf-btn');
-    btn.textContent = '處理中…';
-    btn.disabled = true;
-    try {
-      const { jsPDF } = window.jspdf;
-
-      // 強制切換成電腦版寬度再截圖
-      const metaViewport = document.querySelector('meta[name=viewport]');
-      const origViewport = metaViewport ? metaViewport.getAttribute('content') : '';
-      if (metaViewport) metaViewport.setAttribute('content', 'width=900');
-
-      // 強制 body 展開成電腦版
-      const origBodyStyle = document.body.getAttribute('style') || '';
-      document.body.style.cssText = 'min-width:900px; padding:0; margin:0; background:#fff;';
-
-      const page = document.querySelector('.page');
-      const origPageStyle = page.getAttribute('style') || '';
-      page.style.cssText = 'width:794px !important; min-height:auto !important; padding:40px 52px !important; display:flex !important; flex-direction:column !important; background:#fff !important; box-sizing:border-box !important;';
-
-      // 強制 header 橫排
-      const header = document.querySelector('.header');
-      const origHeaderStyle = header ? (header.getAttribute('style') || '') : '';
-      if (header) header.style.cssText = 'display:flex !important; flex-direction:row !important; align-items:flex-end !important; gap:16px !important;';
-
-      // 強制 row 橫排
-      const rows = document.querySelectorAll('.row');
-      const origRowStyles = [];
-      rows.forEach(function(r) { origRowStyles.push(r.getAttribute('style') || ''); r.style.flexDirection = 'row'; });
-
-      const cells = document.querySelectorAll('.cell');
-      const origCellStyles = [];
-      cells.forEach(function(c) { origCellStyles.push(c.getAttribute('style') || ''); c.style.borderRight = '0.5px solid #b0b8cc'; c.style.borderBottom = 'none'; });
-
-      const signRow = document.querySelector('.sign-row');
-      const origSignRowStyle = signRow ? (signRow.getAttribute('style') || '') : '';
-      if (signRow) signRow.style.flexDirection = 'row';
-
-      const signCells = document.querySelectorAll('.sign-cell');
-      const origSignCellStyles = [];
-      signCells.forEach(function(sc) { origSignCellStyles.push(sc.getAttribute('style') || ''); sc.style.borderRight = '0.5px solid #b0b8cc'; sc.style.borderBottom = 'none'; });
-
-      const cg = document.querySelector('.checkbox-grid');
-      const origCgStyle = cg ? (cg.getAttribute('style') || '') : '';
-      if (cg) cg.style.cssText = 'display:grid !important; grid-template-columns:repeat(6,1fr) !important; gap:6px 8px !important; padding:8px 10px !important;';
-
-      // 隱藏不需要截圖的元素
-      const actionBar = document.querySelector('.action-bar');
-      if (actionBar) actionBar.style.display = 'none';
-      const pageSign = document.getElementById('page-sign');
-      if (pageSign) pageSign.style.display = 'none';
-
-      // 強制 logo-placeholder
-      const logoPh = document.querySelector('.logo-placeholder');
-      const origLogoPhStyle = logoPh ? (logoPh.getAttribute('style') || '') : '';
-      if (logoPh) logoPh.style.cssText = 'width:110px !important; height:48px !important; flex-shrink:0 !important;';
-
-      // 強制 company-info
-      const ci = document.querySelector('.company-info');
-      const origCiStyle = ci ? (ci.getAttribute('style') || '') : '';
-      if (ci) ci.style.cssText = 'font-size:10.5px !important; color:#444 !important; line-height:1.7 !important; flex:1 !important;';
-
-      // 強制每個 cell 的寬度回到 flex
-      const cellLabels = document.querySelectorAll('.cell-label');
-      const origCellLabelStyles = [];
-      cellLabels.forEach(function(cl) {
-        origCellLabelStyles.push(cl.getAttribute('style') || '');
-        cl.style.cssText = 'width:80px !important; min-width:80px !important; font-size:13.5px !important;';
-      });
-
-      const cellValues = document.querySelectorAll('.cell-value');
-      const origCellValueStyles = [];
-      cellValues.forEach(function(cv) {
-        origCellValueStyles.push(cv.getAttribute('style') || '');
-        cv.style.cssText = 'flex:1 !important; font-size:13.5px !important; padding:5px 8px !important; min-width:0 !important;';
-      });
-
-      // 強制 sign-row 橫排
-      const signLabels = document.querySelectorAll('.sign-label');
-      const origSignLabelStyles = [];
-      signLabels.forEach(function(sl) {
-        origSignLabelStyles.push(sl.getAttribute('style') || '');
-        sl.style.fontSize = '13.5px';
-      });
-
-      // 等 layout 更新
-      await new Promise(function(r) { setTimeout(r, 300); });
-
-      const contentH = page.scrollHeight;
-
-      const canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        scrollX: 0,
-        scrollY: 0,
-        width: 794,
-        height: contentH,
-        windowWidth: 900,
-        windowHeight: contentH,
-        onclone: function(doc) {
-          doc.querySelectorAll('input').forEach(function(inp) {
-            inp.style.border = 'none';
-            inp.style.outline = 'none';
-            inp.style.boxShadow = 'none';
-            inp.style.webkitAppearance = 'none';
-            inp.style.background = 'transparent';
-          });
-          doc.querySelectorAll('*').forEach(function(e) {
-            try {
-              if (e.style.color && e.style.color.includes('color(')) e.style.color = '#222222';
-              if (e.style.backgroundColor && e.style.backgroundColor.includes('color(')) e.style.backgroundColor = '#ffffff';
-            } catch(err) {}
-          });
-        }
-      });
-
-      // 還原所有樣式
-      if (metaViewport) metaViewport.setAttribute('content', origViewport);
-      document.body.setAttribute('style', origBodyStyle);
-      page.setAttribute('style', origPageStyle);
-      if (header) header.setAttribute('style', origHeaderStyle);
-      rows.forEach(function(r, i) { r.setAttribute('style', origRowStyles[i]); });
-      cells.forEach(function(c, i) { c.setAttribute('style', origCellStyles[i]); });
-      if (signRow) signRow.setAttribute('style', origSignRowStyle);
-      signCells.forEach(function(sc, i) { sc.setAttribute('style', origSignCellStyles[i]); });
-      if (cg) cg.setAttribute('style', origCgStyle);
-      if (logoPh) logoPh.setAttribute('style', origLogoPhStyle);
-      if (ci) ci.setAttribute('style', origCiStyle);
-      cellLabels.forEach(function(cl, i) { cl.setAttribute('style', origCellLabelStyles[i]); });
-      cellValues.forEach(function(cv, i) { cv.setAttribute('style', origCellValueStyles[i]); });
-      signLabels.forEach(function(sl, i) { sl.setAttribute('style', origSignLabelStyles[i]); });
-      if (actionBar) actionBar.style.display = '';
-      if (pageSign) pageSign.style.display = '';
-
-      // 產生 PDF
-      const pdfW = 210;
-      const pdfH = Math.round((canvas.height / canvas.width) * pdfW);
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] });
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
-
-      const company = document.getElementById('f-company').value.trim() || '客戶';
-      const date = document.getElementById('f-date').value || new Date().toISOString().split('T')[0];
-      pdf.save('服務紀錄單_' + company + '_' + date + '.pdf');
-
-    } catch(e) {
-      alert('PDF 產生失敗：' + e.message);
-    } finally {
-      btn.textContent = '列印 / 存 PDF';
-      btn.disabled = false;
-    }
+  function downloadPDF() {
+    window.print();
   }
 </script>
 
